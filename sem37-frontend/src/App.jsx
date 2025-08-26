@@ -5,7 +5,7 @@ import { marked } from 'marked';
 // --- HELPER COMPONENTS ---
 
 const Icon = ({ path, className = "w-6 h-6" }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+  <svg xmlns="http://www.w.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
     <path strokeLinecap="round" strokeLinejoin="round" d={path} />
   </svg>
 );
@@ -21,9 +21,9 @@ const StatusBadge = ({ status }) => {
 };
 
 // --- API Configuration ---
-// For deployment, you will need to replace this with your live backend URL.
-// Example: const API_BASE_URL = 'https://your-backend-app.onrender.com';
-const API_BASE_URL = 'http://127.0.0.1:5000';
+// This URL should be updated to your live Render backend URL before final deployment.
+// For example: const API_BASE_URL = 'https://sem37.onrender.com';
+const API_BASE_URL = 'https://sem37.onrender.com';
 
 
 // --- TOOL COMPONENTS ---
