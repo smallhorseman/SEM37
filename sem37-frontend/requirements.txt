@@ -1,0 +1,9 @@
+Flask
+flask-cors
+requests
+beautifulsoup4
+selenium
+webdriver-manager
+google-generativeai
+gunicorn
+google-cloud-firestore
