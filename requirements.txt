@@ -1,9 +1,1 @@
-Flask
-flask-cors
-requests
-beautifulsoup4
-selenium
-webdriver-manager
-google-generativeai
-gunicorn
-python-dotenv
+Flaskflask-corsrequestsbeautifulsoup4seleniumwebdriver-managergoogle-generativeaigunicornpython-dotenvgoogle-cloud-firestore
