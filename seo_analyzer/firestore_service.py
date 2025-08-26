@@ -81,6 +81,55 @@ def get_latest_analysis(domain):
     except Exception as e:
         print(f"Error getting analysis for {domain}: {e}")
         return None
-```
+import os
+from google.cloud import firestore
+from datetime import datetime, timedelta, timezone
 
-After you update the file with this clean version, please try deploying to Render again. This should resolve the `SyntaxErro
+try:
+    db = firestore.Client()
+    print(f"Successfully connected to Firestore project: {db.project}")
+except Exception as e:
+    print(f"Error connecting to Firestore: {e}")
+    print("Please ensure you have authenticated via `gcloud auth application-default login` for local development.")
+    db = None
+
+def save_analysis(domain, data):
+    if not db:
+        print("Firestore client not initialized. Skipping save.")
+        return
+
+    try:
+        doc_ref = db.collection('analyses').document(domain)
+        data['timestamp'] = firestore.SERVER_TIMESTAMP
+        doc_ref.set(data)
+        print(f"Successfully saved analysis for {domain}")
+    except Exception as e:
+        print(f"Error saving analysis for {domain}: {e}")
+
+
+def get_latest_analysis(domain):
+    if not db:
+        print("Firestore client not initialized. Skipping fetch.")
+        return None
+        
+    try:
+        doc_ref = db.collection('analyses').document(domain)
+        doc = doc_ref.get()
+
+        if doc.exists:
+            data = doc.to_dict()
+            timestamp = data.get('timestamp')
+            
+            if timestamp and (datetime.now(timezone.utc) - timestamp) < timedelta(hours=24):
+                print(f"Found recent analysis for {domain} in cache.")
+                data['timestamp'] = timestamp.isoformat()
+                return data
+            else:
+                print(f"Analysis for {domain} is outdated.")
+                return None
+        else:
+            print(f"No previous analysis found for {domain}.")
+            return None
+    except Exception as e:
+        print(f"Error getting analysis for {domain}: {e}")
+        return None
