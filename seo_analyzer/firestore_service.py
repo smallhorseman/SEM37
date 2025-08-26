@@ -83,15 +83,4 @@ def get_latest_analysis(domain):
         return None
 ```
 
-### Summary of Changes
-
-The main change is in the "Firestore Initialization" section.
-
-* **Removed Hardcoded Project ID**: I've removed the line `PROJECT_ID = "sem37-59249"` and the `project=PROJECT_ID` argument from the `firestore.Client()` call.
-* **Automatic Credentials**: The `firestore.Client()` will now automatically find the necessary credentials from its environment. This is called "Application Default Credentials" (ADC).
-    * **For local development**, you just need to run the command `gcloud auth application-default login` one time in your terminal. This links your local environment to your Google Cloud account.
-    * **When you deploy your app**, the hosting provider (like Google Cloud Run or Render) will automatically provide these credentials, so you won't need to do anything extra.
-
-This makes your code cleaner, more secure, and ready for deployment.
-
-Let me know once you've updated the file, and we can move on to the next f
+After you update the file with this clean version, please try deploying to Render again. This should resolve the `SyntaxErro
