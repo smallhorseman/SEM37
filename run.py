@@ -1,4 +1,3 @@
-# run.py
 from seo_analyzer import create_app
 
 app = create_app()
