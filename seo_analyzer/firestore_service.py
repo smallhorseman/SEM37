@@ -1,19 +1,29 @@
 # seo_analyzer/firestore_service.py
 import os
 from google.cloud import firestore
+from google.oauth2 import service_account
 from datetime import datetime, timedelta, timezone
 
 # --- Firestore Initialization ---
-# This code is now simplified. It will automatically use the 
-# GOOGLE_APPLICATION_CREDENTIALS environment variable (which Render sets to the path of your secret file)
-# to authenticate. For local development, it will use your gcloud login.
 db = None
 try:
     print("Connecting to Firestore...")
-    # The google-cloud-firestore library automatically finds and uses
-    # the GOOGLE_APPLICATION_CREDENTIALS environment variable that Render sets.
-    db = firestore.Client()
+    
+    # Get the path to the credentials file from the environment variable set by Render
+    credentials_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+
+    if credentials_path:
+        print(f"Found credentials file at: {credentials_path}")
+        # Explicitly use the service account file for authentication
+        credentials = service_account.Credentials.from_service_account_file(credentials_path)
+        db = firestore.Client(credentials=credentials)
+    else:
+        # Fallback for local development (uses your gcloud login)
+        print("No credentials file path found, using default credentials for local development.")
+        db = firestore.Client()
+
     print("Successfully connected to Firestore.")
+
 except Exception as e:
     print(f"Error connecting to Firestore: {e}")
 
