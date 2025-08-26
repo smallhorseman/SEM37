@@ -1,18 +1,13 @@
-# seo_analyzer/routes.py
 from flask import Blueprint, jsonify, request
 import random
 from .scrapper import scrape_top_organic_keywords
 from .firestore_service import save_analysis, get_latest_analysis
-from .on_page_analyzer import analyze_on_page_seo # Import the new function
+from .on_page_analyzer import analyze_on_page_seo
 
 main = Blueprint('main', __name__)
 
 @main.route('/analyze', methods=['POST'])
 def analyze_domain():
-    """
-    Analyzes a domain by first checking for a recent result in Firestore,
-    and then scraping if no recent data is found.
-    """
     data = request.get_json()
     domain = data.get('domain')
 
@@ -23,7 +18,6 @@ def analyze_domain():
     if cached_data:
         return jsonify(cached_data)
 
-    print(f"No recent data for {domain}. Performing a new analysis...")
     scraped_keywords = scrape_top_organic_keywords(domain)
     
     top_organic_keywords_data = [
@@ -54,9 +48,6 @@ def analyze_domain():
 
 @main.route('/keyword_finder', methods=['POST'])
 def keyword_finder():
-    """
-    Takes a seed keyword and returns a list of related keywords with mock data.
-    """
     data = request.get_json()
     keyword = data.get('keyword')
 
@@ -73,12 +64,8 @@ def keyword_finder():
 
     return jsonify(mock_results)
 
-# --- NEW ENDPOINT ---
 @main.route('/on_page_seo_check', methods=['POST'])
 def on_page_seo_check():
-    """
-    Analyzes the on-page SEO of a specific URL.
-    """
     data = request.get_json()
     url = data.get('url')
 
