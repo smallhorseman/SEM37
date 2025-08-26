@@ -1,4 +1,3 @@
-# seo_analyzer/on_page_analyzer.py
 import requests
 from bs4 import BeautifulSoup
 from selenium import webdriver
@@ -6,14 +5,9 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 import time
-from .gemini_service import get_gemini_recommendations # Import the new function
+from .gemini_service import get_gemini_recommendations
 
 def analyze_on_page_seo(url):
-    """
-    Analyzes the on-page SEO elements of a given URL using Selenium
-    and gets AI recommendations from Gemini.
-    """
-    # --- Selenium Setup ---
     chrome_options = Options()
     chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
@@ -36,7 +30,6 @@ def analyze_on_page_seo(url):
         page_source = driver.page_source
         soup = BeautifulSoup(page_source, 'html.parser')
 
-        # --- Data Gathering (Same as before) ---
         title_tag = soup.find('title')
         title_text = title_tag.get_text() if title_tag else ''
         title_analysis = {'text': title_text, 'length': len(title_text), 'status': 'good' if 50 <= len(title_text) <= 60 else 'warning' if len(title_text) > 0 else 'error'}
@@ -55,7 +48,6 @@ def analyze_on_page_seo(url):
         for img in soup.find_all('img'):
             images.append({'src': img.get('src', ''), 'alt': img.get('alt', '').strip(), 'status': 'good' if img.get('alt', '').strip() else 'error'})
 
-        # --- Compile all the data ---
         analysis_results = {
             'title': title_analysis,
             'metaDescription': meta_desc_analysis,
@@ -65,11 +57,8 @@ def analyze_on_page_seo(url):
             'url': url
         }
 
-        # --- NEW: Call Gemini API for recommendations ---
-        print("Getting AI recommendations...")
         recommendations = get_gemini_recommendations(analysis_results)
         analysis_results['recommendations'] = recommendations
-        print("Done.")
 
         return analysis_results
 
