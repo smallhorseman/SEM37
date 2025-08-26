@@ -78,9 +78,8 @@ button:disabled {
 }
 
 /* Update card and input styles to match the new theme */
-.bg-white.dark\\:bg-gray-800 {
-  background-color: var(--color-surface);
-}
+/* This is handled by Tailwind classes directly in the components, 
+   so the general override is no longer needed. */
 
 input {
   background-color: var(--color-background) !important;
