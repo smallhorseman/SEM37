@@ -1,6 +1,10 @@
 # seo_analyzer/gemini_service.py
 import os
 import google.generativeai as genai
+from dotenv import load_dotenv
+
+# Load environment variables from a .env file
+load_dotenv()
 
 def get_gemini_recommendations(seo_data):
     """
@@ -13,10 +17,10 @@ def get_gemini_recommendations(seo_data):
         str: A string containing the AI-generated SEO recommendations.
     """
     try:
-        # Configure the Gemini API client
+        # Configure the Gemini API client by getting the key from the environment
         api_key = os.getenv("GEMINI_API_KEY")
         if not api_key:
-            return "Error: GEMINI_API_KEY environment variable not set."
+            return "Error: GEMINI_API_KEY not found. Please add it to your .env file."
         genai.configure(api_key=api_key)
         
         model = genai.GenerativeModel('gemini-pro')
