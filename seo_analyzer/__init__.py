@@ -6,12 +6,15 @@ def create_app():
     """Creates and configures the Flask app."""
     app = Flask(__name__)
     
-    # Allow requests to all endpoints from your frontend
-    CORS(app, resources={
-        r"/analyze": {"origins": "http://localhost:5174"},
-        r"/keyword_finder": {"origins": "http://localhost:5174"},
-        r"/on_page_seo_check": {"origins": "http://localhost:5174"} # Added the new endpoint here
-    })
+    # --- UPDATED ---
+    # Define the allowed origins
+    origins = [
+        "http://localhost:5174", # For local development
+        "https://tools.studio37.cc"  # Your live frontend URL
+    ]
+
+    # Allow requests from the defined origins to all endpoints
+    CORS(app, resources={r"/*": {"origins": origins}})
 
     # Import and register the routes (blueprint)
     from . import routes
