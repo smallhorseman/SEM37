@@ -6,3 +6,4 @@ selenium
 webdriver-manager
 google-generativeai
 gunicorn
+google-cloud-firestore
