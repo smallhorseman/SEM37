@@ -7,25 +7,26 @@ from datetime import datetime, timedelta, timezone
 # --- Firestore Initialization ---
 db = None
 try:
-    print("Connecting to Firestore...")
+    print("Attempting to connect to Firestore...")
     
-    # Get the path to the credentials file from the environment variable set by Render
+    # Render's Secret File feature sets this environment variable to the path of the key file.
     credentials_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
 
-    if credentials_path:
-        print(f"Found credentials file at: {credentials_path}")
-        # Explicitly use the service account file for authentication
+    # Check if the environment variable and the file it points to exist.
+    if credentials_path and os.path.exists(credentials_path):
+        print(f"Found credentials file at path: {credentials_path}")
+        # Explicitly use the service account file for authentication.
         credentials = service_account.Credentials.from_service_account_file(credentials_path)
         db = firestore.Client(credentials=credentials)
+        print("Successfully connected to Firestore using service account file.")
     else:
-        # Fallback for local development (uses your gcloud login)
-        print("No credentials file path found, using default credentials for local development.")
+        # Fallback for local development (uses your gcloud login).
+        print("No credentials file found. Attempting default credentials for local development.")
         db = firestore.Client()
-
-    print("Successfully connected to Firestore.")
+        print("Successfully connected to Firestore using default credentials.")
 
 except Exception as e:
-    print(f"Error connecting to Firestore: {e}")
+    print(f"CRITICAL ERROR connecting to Firestore: {e}")
 
 
 def save_analysis(domain, data):
