@@ -1,1 +1,10 @@
-Flaskflask-corsrequestsbeautifulsoup4seleniumwebdriver-managergoogle-generativeaigunicornpython-dotenvgoogle-cloud-firestore
+Flask
+flask-cors
+requests
+beautifulsoup4
+selenium
+webdriver-manager
+google-generativeai
+gunicorn
+python-dotenv
+google-cloud-firestore
