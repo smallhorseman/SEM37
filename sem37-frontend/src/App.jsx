@@ -1,5 +1,5 @@
 // src/App.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { marked } from 'marked';
 
 // --- HELPER COMPONENTS ---
@@ -47,16 +47,19 @@ const DomainAnalysis = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ domain }),
       });
-      if (!response.ok) throw new Error('Network response was not ok');
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({error: "An unknown error occurred."}));
+        throw new Error(errData.error || 'Network response was not ok');
+      }
       const data = await response.json();
       setAnalysisResult(data);
-    } catch (error) {
-      setError('Failed to get analysis. Make sure the backend server is running.');
+    } catch (err) {
+      setError(err.message || 'Failed to get analysis. Make sure the backend server is running.');
     } finally {
       setIsLoading(false);
     }
   };
-
+  
   const StatCard = ({ title, value, icon, change, changeType }) => {
     const isPositive = changeType === 'positive';
     const changeColor = isPositive ? 'text-green-500' : 'text-red-500';
@@ -78,7 +81,7 @@ const DomainAnalysis = () => {
     <div className="mt-12">
       <div className="max-w-2xl mx-auto">
         <div className="relative">
-          <input type="text" value={domain} onChange={(e) => setDomain(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleAnalyze()} placeholder="e.g., spyfu.com" className="w-full px-5 py-3 text-lg bg-gray-900/50 border-2 border-gray-600 rounded-full focus:outline-none focus:ring-2 focus:ring-yellow-400 transition duration-300 text-white placeholder-gray-500" />
+          <input type="text" value={domain} onChange={(e) => setDomain(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleAnalyze()} placeholder="e.g., studio37.cc" className="w-full px-5 py-3 text-lg bg-gray-900/50 border-2 border-gray-600 rounded-full focus:outline-none focus:ring-2 focus:ring-yellow-400 transition duration-300 text-white placeholder-gray-500" />
           <button onClick={handleAnalyze} disabled={isLoading} className="absolute right-2.5 top-1/2 -translate-y-1/2 bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-2 px-6 rounded-full transition duration-300 disabled:bg-gray-600 disabled:cursor-not-allowed">
             {isLoading ? 'Analyzing...' : 'Analyze'}
           </button>
@@ -105,21 +108,135 @@ const DomainAnalysis = () => {
 };
 
 const KeywordFinder = () => {
-  // ... (Component logic remains the same, but styles will be inherited)
+  const [keyword, setKeyword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [results, setResults] = useState([]);
+  const [error, setError] = useState(null);
+  const [hasSearched, setHasSearched] = useState(false);
+
+  const handleSearch = async () => {
+    if (!keyword) {
+      setError('Please enter a keyword to search.');
+      return;
+    }
+    setIsLoading(true);
+    setError(null);
+    setResults([]);
+    setHasSearched(true);
+    try {
+      const response = await fetch(`${API_BASE_URL}/keyword_finder`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ keyword }),
+      });
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({error: "An unknown error occurred."}));
+        throw new Error(errData.error || 'Network response was not ok');
+      }
+      const data = await response.json();
+      setResults(data);
+    } catch (err) {
+      setError(err.message || 'Failed to get keywords. Make sure the backend server is running.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="bg-gray-800/50 backdrop-blur-sm p-6 rounded-lg shadow-lg border border-white/10">
       <p className="text-gray-400 mb-4">Enter a seed keyword to discover new opportunities.</p>
-      {/* ... rest of JSX ... */}
+      <div className="flex flex-col sm:flex-row gap-2 mb-6">
+        <input type="text" value={keyword} onChange={(e) => setKeyword(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleSearch()} placeholder="e.g., wedding photography" className="flex-grow px-4 py-2 bg-gray-900/50 border-2 border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400 text-white placeholder-gray-500" />
+        <button onClick={handleSearch} disabled={isLoading} className="bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-2 px-6 rounded-md transition duration-300 disabled:bg-gray-600 flex items-center justify-center">
+          {isLoading ? <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-black"></div> : <Icon path="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" className="w-5 h-5 mr-2" />}
+          {isLoading ? 'Searching...' : 'Find Keywords'}
+        </button>
+      </div>
+      {error && <p className="text-red-500 text-center mb-4">{error}</p>}
+      <div className="overflow-x-auto">
+        <table className="w-full text-left">
+          <thead><tr className="border-b border-gray-600"><th className="p-3 text-gray-400">Keyword</th><th className="p-3 text-gray-400">Search Volume</th><th className="p-3 text-gray-400">CPC (USD)</th><th className="p-3 text-gray-400">Difficulty</th></tr></thead>
+          <tbody>
+            {isLoading && <tr><td colSpan="4" className="text-center p-6"><p className="text-gray-500">Fetching keyword data...</p></td></tr>}
+            {results.length > 0 && !isLoading && results.map((res, index) => (
+              <tr key={index} className="border-b border-gray-700 last:border-b-0 hover:bg-gray-700/50">
+                <td className="p-3 font-medium text-white">{res.keyword}</td><td className="p-3 text-white">{res.volume.toLocaleString()}</td><td className="p-3 text-white">${res.cpc.toFixed(2)}</td>
+                <td className="p-3"><span className={`text-xs font-medium me-2 px-2.5 py-0.5 rounded ${res.difficulty > 80 ? 'bg-red-900 text-red-300' : res.difficulty > 60 ? 'bg-yellow-900 text-yellow-300' : 'bg-green-900 text-green-300'}`}>{res.difficulty}</span></td>
+              </tr>
+            ))}
+            {!isLoading && results.length === 0 && <tr><td colSpan="4" className="text-center p-6"><p className="text-gray-500">{hasSearched ? 'No results found.' : 'Your results will appear here.'}</p></td></tr>}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };
 
 const OnPageSeoChecker = () => {
-  // ... (Component logic remains the same, but styles will be inherited)
+  const [url, setUrl] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [results, setResults] = useState(null);
+  const [error, setError] = useState(null);
+
+  const handleAnalyze = async () => {
+    if (!url) {
+      setError('Please enter a URL to analyze.');
+      return;
+    }
+    setIsLoading(true);
+    setError(null);
+    setResults(null);
+    try {
+      const response = await fetch(`${API_BASE_URL}/on_page_seo_check`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+         const errData = await response.json().catch(() => ({error: "An unknown error occurred."}));
+        throw new Error(errData.error || 'An error occurred.');
+      }
+      setResults(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const GeminiRecommendations = ({ recommendations }) => {
+    const renderedHtml = marked(recommendations || '');
+    return (
+      <div className="mt-8">
+        <h3 className="font-bold text-xl mb-3 flex items-center text-yellow-400"><Icon path="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.898 20.562L16.25 21.75l-.648-1.188a2.25 2.25 0 01-1.423-1.423L13.25 18l1.188-.648a2.25 2.25 0 011.423-1.423L16.25 15l.648 1.188a2.25 2.25 0 011.423 1.423L19.75 18l-1.188.648a2.25 2.25 0 01-1.423 1.423z" className="w-6 h-6 mr-2" />AI-Powered Strategy</h3>
+        <div className="prose prose-sm prose-invert bg-gray-900/50 p-4 rounded-md border border-white/10" dangerouslySetInnerHTML={{ __html: renderedHtml }}></div>
+      </div>
+    );
+  };
+  
   return (
     <div className="bg-gray-800/50 backdrop-blur-sm p-6 rounded-lg shadow-lg border border-white/10">
       <p className="text-gray-400 mb-4">Enter a full URL to audit its on-page SEO elements.</p>
-      {/* ... rest of JSX ... */}
+      <div className="flex flex-col sm:flex-row gap-2 mb-6">
+        <input type="text" value={url} onChange={(e) => setUrl(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleAnalyze()} placeholder="e.g., https://www.studio37.cc" className="flex-grow px-4 py-2 bg-gray-900/50 border-2 border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400 text-white placeholder-gray-500" />
+        <button onClick={handleAnalyze} disabled={isLoading} className="bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-2 px-6 rounded-md transition duration-300 disabled:bg-gray-600 flex items-center justify-center">
+          {isLoading ? <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-black"></div> : <Icon path="M9.75 3.104v5.714a2.25 2.25 0 01-.5 1.591L5.25 12.5M9.75 3.104a2.25 2.25 0 00-3.422-.243L4.25 5.5M9.75 3.104a2.25 2.25 0 013.422-.243l2.028 2.646M21 12a9 9 0 11-18 0 9 9 0 0118 0z" className="w-5 h-5 mr-2" />}
+          {isLoading ? 'Auditing...' : 'Audit Page'}
+        </button>
+      </div>
+      {error && <p className="text-red-500 text-center mb-4">{error}</p>}
+      {isLoading && <div className="text-center p-6"><p className="text-gray-500">Analyzing page content and generating AI strategy...</p></div>}
+      {results && (
+        <div className="space-y-6">
+            <div><h3 className="font-bold text-lg mb-2 text-white">Title Tag</h3><div className="p-4 bg-gray-900/50 rounded-md"><p className="font-mono break-words text-gray-300">"{results.title.text || 'Not Found'}"</p><div className="flex items-center mt-2 text-sm"><StatusBadge status={results.title.status} /><span>Length: {results.title.length} characters (Recommended: 50-60)</span></div></div></div>
+            <div><h3 className="font-bold text-lg mb-2 text-white">Meta Description</h3><div className="p-4 bg-gray-900/50 rounded-md"><p className="break-words text-gray-400">"{results.metaDescription.text || 'Not Found'}"</p><div className="flex items-center mt-2 text-sm"><StatusBadge status={results.metaDescription.status} /><span>Length: {results.metaDescription.length} characters (Recommended: 150-160)</span></div></div></div>
+            <div><h3 className="font-bold text-lg mb-2 text-white">H1 Tags</h3><div className="p-4 bg-gray-900/50 rounded-md"><ul className="list-disc list-inside text-gray-300">{results.h1.tags.length > 0 ? results.h1.tags.map((tag, i) => <li key={i}>{tag}</li>) : <li>No H1 tags found.</li>}</ul><div className="flex items-center mt-2 text-sm"><StatusBadge status={results.h1.status} /><span>Found: {results.h1.count} (Recommended: 1)</span></div></div></div>
+            <div><h3 className="font-bold text-lg mb-2 text-white">Content</h3><div className="p-4 bg-gray-900/50 rounded-md"><p>Total word count: <span className="font-bold">{results.wordCount.toLocaleString()}</span></p></div></div>
+            <div><h3 className="font-bold text-lg mb-2 text-white">Image SEO</h3><div className="p-4 bg-gray-900/50 rounded-md max-h-60 overflow-y-auto"><ul className="space-y-2">{results.images.map((img, i) => (<li key={i} className="flex items-start text-sm"><StatusBadge status={img.status} /><span className="font-mono break-all text-gray-400">{img.src}</span></li>))}</ul></div></div>
+            {results.recommendations && <GeminiRecommendations recommendations={results.recommendations} />}
+        </div>
+      )}
     </div>
   );
 };
