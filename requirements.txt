@@ -7,3 +7,4 @@ webdriver-manager
 google-generativeai
 gunicorn
 google-cloud-firestore
+google-auth-oauthlib
