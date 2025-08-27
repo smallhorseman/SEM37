@@ -1,3 +1,17 @@
 [submodule "Studio37Website_temp"]
 	path = Studio37Website_temp
 	url = https://github.com/smallhorseman/Studio37Website_temp.git
+# Initialize the submodule
+git submodule init
+
+# Update the submodule to fetch its contents
+git submodule update
+
+# Make sure the .gitmodules file is added to the repository
+git add .gitmodules
+
+# Commit the changes
+git commit -m "Configure Studio37Website_temp submodule"
+
+# Push the changes to your remote repository
+git push
