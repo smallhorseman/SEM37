@@ -24,15 +24,15 @@ const OnPageSeoChecker = ({ API_BASE_URL, StatusBadge }) => {
       const data = await response.json();
 
       if (!response.ok) {
-          if (data && data.error) {
-              setError(data.error);
-          } else {
-              setError('An unexpected error occurred.');
-          }
-          setResults(null);
+        if (data && data.error) {
+          setError(data.error);
+        } else {
+          setError('An unexpected error occurred.');
+        }
+        setResults(null);
       } else {
-          setResults(data);
-          setError(null);
+        setResults(data);
+        setError(null);
       }
 
     } catch (err) {
@@ -57,11 +57,34 @@ const OnPageSeoChecker = ({ API_BASE_URL, StatusBadge }) => {
       {isLoading && <div className="text-center p-6"><p className="text-gray-500">Analyzing page content...</p></div>}
       {results && (
         <div className="space-y-6">
-            <div><h3 className="font-bold text-lg mb-2">Title Tag</h3><div className="p-4 bg-gray-50 rounded-md"><p className="font-mono break-words">"{results.title.text || 'Not Found'}"</p><div className="flex items-center mt-2 text-sm"><StatusBadge status={results.title.status} /><span>Length: {results.title.length} characters (Recommended: 50-60)</span></div></div></div>
-            <div><h3 className="font-bold text-lg mb-2">Meta Description</h3><div className="p-4 bg-gray-50 rounded-md"><p className="break-words text-gray-600">"{results.metaDescription.text || 'Not Found'}"</p><div className="flex items-center mt-2 text-sm"><StatusBadge status={results.metaDescription.status} /><span>Length: {results.metaDescription.length} characters (Recommended: 150-160)</span></div></div></div>
-            <div><h3 className="font-bold text-lg mb-2">H1 Tags</h3><div className="p-4 bg-gray-50 rounded-md"><ul className="list-disc list-inside">{results.h1.tags.length > 0 ? results.h1.tags.map((tag, i) => <li key={i}>{tag}</li>) : <li>No H1 tags found.</li>}</ul><div className="flex items-center mt-2 text-sm"><StatusBadge status={results.h1.status} /><span>Found: {results.h1.count} (Recommended: 1)</span></div></div></div>
-            <div><h3 className="font-bold text-lg mb-2">Content</h3><div className="p-4 bg-gray-50 rounded-md"><p>Total word count: <span className="font-bold">{results.wordCount.toLocaleString()}</span></p></div></div>
-            <div><h3 className="font-bold text-lg mb-2">Image SEO</h3><div className="p-4 bg-gray-50 rounded-md max-h-60 overflow-y-auto"><ul className="space-y-2">{results.images.map((img, i) => (<li key={i} className="flex items-start text-sm"><StatusBadge status={img.status} /><span className="font-mono break-all">{img.src}</span></li>))}</ul></div></div>
+          <div><h3 className="font-bold text-lg mb-2">Title Tag</h3><div className="p-4 bg-gray-50 rounded-md"><p className="font-mono break-words">"{results.title.text || 'Not Found'}"</p><div className="flex items-center mt-2 text-sm"><StatusBadge status={results.title.status} /><span>Length: {results.title.length} characters (Recommended: 50-60)</span></div></div></div>
+          <div><h3 className="font-bold text-lg mb-2">Meta Description</h3><div className="p-4 bg-gray-50 rounded-md"><p className="break-words text-gray-600">"{results.metaDescription.text || 'Not Found'}"</p><div className="flex items-center mt-2 text-sm"><StatusBadge status={results.metaDescription.status} /><span>Length: {results.metaDescription.length} characters (Recommended: 150-160)</span></div></div></div>
+          <div><h3 className="font-bold text-lg mb-2">H1 Tags</h3><div className="p-4 bg-gray-50 rounded-md"><ul className="list-disc list-inside">{results.h1.tags.length > 0 ? results.h1.tags.map((tag, i) => <li key={i}>{tag}</li>) : <li>No H1 tags found.</li>}</ul><div className="flex items-center mt-2 text-sm"><StatusBadge status={results.h1.status} /><span>Found: {results.h1.count} (Recommended: 1)</span></div></div></div>
+          <div><h3 className="font-bold text-lg mb-2">Content</h3><div className="p-4 bg-gray-50 rounded-md"><p>Total word count: <span className="font-bold">{results.wordCount.toLocaleString()}</span></p></div></div>
+          <div>
+            <h3 className="font-bold text-lg mb-2">Image SEO</h3>
+            <div className="p-4 bg-gray-50 rounded-md max-h-60 overflow-y-auto">
+              <ul className="space-y-2">
+                {results.images && results.images.length > 0 ? (
+                  results.images.map((img, i) => (
+                    <li key={i} className="flex items-start text-sm">
+                      <StatusBadge status={img.status} />
+                      <div className="relative w-full">
+                        <img
+                          src={img.src}
+                          alt={img.alt || 'Image'}
+                          className="aspect-[16/9] w-full rounded-2xl bg-gray-100 object-cover sm:aspect-[2/1] lg:aspect-[3/2]"
+                        />
+                      </div>
+                      <span className="font-mono break-all">{img.src}</span>
+                    </li>
+                  ))
+                ) : (
+                  <li>No images found.</li>
+                )}
+              </ul>
+            </div>
+          </div>
         </div>
       )}
     </div>
