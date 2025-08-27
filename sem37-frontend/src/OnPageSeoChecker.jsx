@@ -20,16 +20,29 @@ const OnPageSeoChecker = ({ API_BASE_URL, StatusBadge }) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url }),
       });
+
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'An error occurred.');
-      setResults(data);
+
+      if (!response.ok) {
+          if (data && data.error) {
+              setError(data.error);
+          } else {
+              setError('An unexpected error occurred.');
+          }
+          setResults(null);
+      } else {
+          setResults(data);
+          setError(null);
+      }
+
     } catch (err) {
       setError(err.message);
+      setResults(null);
     } finally {
       setIsLoading(false);
     }
   };
-  
+
   return (
     <div className="bg-white p-6 rounded-lg shadow-md">
       <p className="text-gray-600 mb-4">Enter a full URL to audit its on-page SEO elements.</p>
