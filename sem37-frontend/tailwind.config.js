@@ -7,12 +7,15 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        heading: ['Cormorant Garamond', 'serif'],
-        body: ['Lato', 'sans-serif'],
+        heading: ['DM Serif Display', 'serif'],
+        body: ['Inter', 'sans-serif'],
       },
       colors: {
-        'accent': '#d4af37',
-        'accent-hover': '#e7c864',
+        'studio-bg': '#FFFDF6',
+        'studio-primary': '#36454F',
+        'studio-accent': '#D2B48C',
+        'studio-button': '#468289',
+        'studio-button-hover': '#36454F',
       }
     },
   },

@@ -1,41 +1,47 @@
-/* Import fonts from Google Fonts to match studio37.cc */
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@700&family=Lato:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --font-heading: 'Cormorant Garamond', serif;
-  --font-body: 'Lato', sans-serif;
-  --color-background: #000000;
-  --color-text: rgba(255, 255, 255, 0.9);
-  --color-accent: #d4af37;
+  --color-studio-bg: #FFFDF6;
+  --color-studio-primary: #36454F;
+  --color-studio-accent: #D2B48C;
+  --color-studio-button: #468289;
+  --color-studio-button-hover: #36454F;
 }
 
 body {
-  font-family: var(--font-body);
-  background-color: var(--color-background);
-  color: var(--color-text);
+  font-family: 'Inter', sans-serif;
+  background-color: var(--color-studio-bg);
+  color: var(--color-studio-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Apply the heading font to all relevant elements */
 h1, h2, h3, h4, h5, h6, .font-heading {
-  font-family: var(--font-heading);
+  font-family: 'DM Serif Display', serif;
 }
 
-/* Prose styles for AI recommendations to match the theme */
-.prose {
-  color: var(--color-text);
+/* Styling for dark mode (if desired later, adjust these) */
+.dark body {
+  background-color: #1a202c; /* Example dark background */
+  color: #e2e8f0; /* Example dark text */
 }
-.prose h3 {
-  color: var(--color-accent);
+
+.dark .prose {
+  color: #e2e8f0;
 }
-.prose strong {
+
+.dark .prose h3 {
+  color: var(--color-studio-accent);
+}
+
+.dark .prose strong {
   color: #fff;
 }
-.prose ul > li::before {
-  background-color: var(--color-accent);
+
+.dark .prose ul > li::before {
+  background-color: var(--color-studio-accent);
 }
