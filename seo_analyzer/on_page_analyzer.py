@@ -4,10 +4,29 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
 import time
 from .gemini_service import get_gemini_recommendations
 
+# Global variable to store the path to the ChromeDriver executable
+_CHROME_DRIVER_PATH = None
+
+def _get_chrome_driver_path():
+    global _CHROME_DRIVER_PATH
+    if _CHROME_DRIVER_PATH is None:
+        _CHROME_DRIVER_PATH = ChromeDriverManager().install()
+    return _CHROME_DRIVER_PATH
+
+def _normalize_url(url):
+    url = url.strip()
+    if not url.startswith(('http://', 'https://')):
+        url = 'https://' + url
+    return url
+
 def analyze_on_page_seo(url):
+    driver = None  # Initialize driver to None for bug fix
     chrome_options = Options()
     chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
@@ -15,17 +34,16 @@ def analyze_on_page_seo(url):
     chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36")
 
     try:
-        driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
-    except Exception as e:
-        return {'error': f"Could not start Selenium WebDriver. Please ensure Chrome is installed. Error: {e}"}
+        driver_path = _get_chrome_driver_path()
+        driver = webdriver.Chrome(service=Service(driver_path), options=chrome_options)
 
-    try:
-        url = url.strip()
-        if not url.startswith(('http://', 'https://')):
-            url = 'https://' + url
-        
+        url = _normalize_url(url)
         driver.get(url)
-        time.sleep(3) 
+
+        # Use explicit wait instead of hardcoded sleep
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.TAG_NAME, "body"))
+        )
         
         page_source = driver.page_source
         soup = BeautifulSoup(page_source, 'html.parser')
@@ -65,4 +83,5 @@ def analyze_on_page_seo(url):
     except Exception as e:
         return {'error': f"An unexpected error occurred during analysis: {e}"}
     finally:
-        driver.quit()
+        if driver:  # Only quit if driver was successfully initialized
+            driver.quit()

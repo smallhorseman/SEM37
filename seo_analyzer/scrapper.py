@@ -1,9 +1,10 @@
 import requests
 from bs4 import BeautifulSoup
+from urllib.parse import urlparse, parse_qs
 
-def scrape_top_organic_keywords(domain):
+def scrape_top_organic_keywords(domain, num_results=20):
     query = f"site:{domain}"
-    url = f"https://www.google.com/search?q={query}&num=20"
+    url = f"https://www.google.com/search?q={query}&num={num_results}"
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36"
     }
@@ -26,14 +27,20 @@ def scrape_top_organic_keywords(domain):
                 title = title_element.get_text()
                 raw_url = link_element['href']
 
-                if raw_url.startswith('/url?q='):
-                    url = raw_url.split('/url?q=')[1].split('&sa=')[0]
-                    
-                    if domain in url:
+                # Use urlparse and parse_qs for more robust URL extraction
+                parsed_raw_url = urlparse(raw_url)
+                query_params = parse_qs(parsed_raw_url.query)
+                
+                if 'q' in query_params:
+                    extracted_url = query_params['q'][0]
+                    parsed_extracted_url = urlparse(extracted_url)
+
+                    # More robust domain check by comparing netloc (hostname)
+                    if domain in parsed_extracted_url.netloc:
                         organic_keywords.append({
                             "position": position,
                             "keyword": title,
-                            "url": url
+                            "url": extracted_url
                         })
                         position += 1
         
